@@ -1,5 +1,12 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+.numbers {
+  display: flex;
+  list-style: none;
+  gap: 1rem;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
