@@ -2,15 +2,19 @@ import { readdirSync, readFileSync } from "fs";
 import { writeJsonFile } from "write-json-file";
 
 interface HomeProps {
-  tam: number;
+  maxRange: number;
   primes: number[];
-  primesInDb: number[];
+  primesInDb: PrimesInDb;
+}
+interface PrimesInDb {
+  primes: number[];
 }
 
-function Home({ tam, primes, primesInDb }: HomeProps) {
+function Home({ maxRange, primes, primesInDb }: HomeProps) {
+  console.log(primesInDb.primes);
   return (
     <div>
-      <h1>Números primos entre 0 e {tam}</h1>
+      <h1>Números primos entre 0 e {maxRange}</h1>
       <ul className="numbers">
         {primes.map((primeNumber) => (
           <li key={primeNumber}>{primeNumber};</li>
@@ -21,47 +25,50 @@ function Home({ tam, primes, primesInDb }: HomeProps) {
 }
 
 export function getServerSideProps() {
-  let tam = 200;
-  let vet: number[] = [];
+  let maxRange = 200;
+  let numberArray: number[] = [];
   let primes: number[] = [];
+  let primesInDb: PrimesInDb = JSON.parse(
+    readFileSync("../data/primes.json").toString()
+  );
 
-  function crivo_eratostenes(posicao: number) {
-    let composto: number = posicao * 2;
+  function sieveOfEratosthenes(position: number) {
+    let composite: number = position * 2;
 
-    if (posicao <= 1) {
-      vet[posicao] = 0;
-    } else if (vet[posicao] == 1) {
-      while (composto < tam) {
-        vet[composto] = 0;
+    if (position <= 1) {
+      numberArray[position] = 0;
+    } else if (numberArray[position] == 1) {
+      while (composite < maxRange) {
+        numberArray[composite] = 0;
 
-        composto += posicao;
+        composite += position;
       }
     }
 
-    if (posicao <= Math.sqrt(tam)) {
-      crivo_eratostenes(posicao + 1);
+    if (position <= Math.sqrt(maxRange)) {
+      sieveOfEratosthenes(position + 1);
     }
   }
 
   function main() {
-    for (let i = 0; i < tam; i++) {
-      vet[i] = 1;
+    for (let i = 0; i < maxRange; i++) {
+      numberArray[i] = 1;
     }
 
-    crivo_eratostenes(0);
+    sieveOfEratosthenes(0);
 
-    for (let i = 0; i < tam; i++) {
-      if (vet[i] == 1) {
+    for (let i = 0; i < maxRange; i++) {
+      if (numberArray[i] == 1) {
         primes.push(i);
       }
-      writeJsonFile("../data/primes.json", { primes: primes });
+      if (primesInDb.primes.length < primes.length)
+        writeJsonFile("../data/primes.json", { primes: primes });
     }
   }
   main();
-  let primesInDb = JSON.parse(readFileSync("../data/primes.json").toString());
 
   return {
-    props: { tam, primes, primesInDb },
+    props: { maxRange, primes, primesInDb },
   };
 }
 export default Home;
