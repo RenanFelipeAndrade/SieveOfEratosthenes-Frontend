@@ -1,5 +1,27 @@
-function Home() {
-  let tam = 500;
+import { readdirSync, readFileSync } from "fs";
+import { writeJsonFile } from "write-json-file";
+
+interface HomeProps {
+  tam: number;
+  primes: number[];
+  primesInDb: number[];
+}
+
+function Home({ tam, primes, primesInDb }: HomeProps) {
+  return (
+    <div>
+      <h1>Números primos entre 0 e {tam}</h1>
+      <ul className="numbers">
+        {primes.map((primeNumber) => (
+          <li key={primeNumber}>{primeNumber};</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function getServerSideProps() {
+  let tam = 200;
   let vet: number[] = [];
   let primes: number[] = [];
 
@@ -32,22 +54,14 @@ function Home() {
       if (vet[i] == 1) {
         primes.push(i);
       }
+      writeJsonFile("../data/primes.json", { primes: primes });
     }
-
-    return 0;
   }
   main();
+  let primesInDb = JSON.parse(readFileSync("../data/primes.json").toString());
 
-  return (
-    <div>
-      <h1>Números primos entre 0 e 100</h1>
-      <ul className="numbers">
-        {primes.map((primeNumber) => (
-          <li key={primeNumber}>{primeNumber};</li>
-        ))}
-      </ul>
-    </div>
-  );
+  return {
+    props: { tam, primes, primesInDb },
+  };
 }
-
 export default Home;
