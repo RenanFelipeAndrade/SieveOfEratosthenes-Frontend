@@ -11,11 +11,10 @@ interface DbFile {
 }
 
 function Home({ maxRange, primes, dbFile }: HomeProps) {
-  console.log(dbFile);
   return (
     <div>
       <header>
-        <h1>Números primos entre 0 e {maxRange}</h1>
+        <h1>The prime numbers between 0 and {maxRange}</h1>
       </header>
       <ul className="numbers">
         {primes.map((primeNumber) => (
