@@ -1,16 +1,14 @@
-import { existsSync, readFileSync } from "fs";
 import { writeJsonFile } from "write-json-file";
+import { DbFile } from "../types/DbFile";
+import { getDb } from "../utils/getDb";
+import { getLastPrimeInDb } from "../utils/getLastPrimeInDb";
 
 interface HomeProps {
   maxRange: number;
   primes: number[];
-  dbFile: DbFile;
-}
-interface DbFile {
-  primes: number[];
 }
 
-function Home({ maxRange, primes, dbFile }: HomeProps) {
+function Home({ maxRange, primes }: HomeProps) {
   return (
     <div>
       <header>
@@ -26,71 +24,54 @@ function Home({ maxRange, primes, dbFile }: HomeProps) {
 }
 
 export function getServerSideProps() {
-  const dbPath = "./data/primes.json";
-  const dbInstance = () => {
-    const hasDbFile = existsSync(dbPath);
-    if (hasDbFile) return JSON.parse(readFileSync(dbPath).toString());
-    writeJsonFile(dbPath, { primes: [2] });
-    return JSON.parse(readFileSync(dbPath).toString());
-  };
-
-  const dbFile: DbFile = dbInstance();
-  const getLastPrimeInDb = () => {
-    const hasPrimes = Object.keys(dbFile).some(
-      (key) => key.toString() === "primes"
-    );
-
-    if (hasPrimes && dbFile.primes.length > 0)
-      return dbFile.primes[dbFile.primes.length - 1];
-
-    writeJsonFile(dbPath, { primes: [2] });
-    return 2;
-  };
-
+  const dbFile: DbFile = getDb();
   const lastPrimeInDb = getLastPrimeInDb();
   const maxRange = 1000;
   const minRange = lastPrimeInDb;
   const numberArray: number[] = [];
-  let primes: number[] = [];
+  const calculatedPrimes: number[] = [];
 
   function sieveOfEratosthenes(number: number) {
-    let composite: number = number * 2;
+    /**
+     * Write all numbers from 2 to N. Do not consider them prime or composite (2 or more distinct divisors).
+     * Takes the first number that hasn't been marked as composite, consider it's prime.
+     * From that prime number, run through all its multiples up to N and mark them as composites
+     * Repeat from step 2.
+     */
+    let composite = number * 2;
 
     if (number <= 1) {
       numberArray[number] = 0;
     } else if (numberArray[number] === 1) {
       while (composite < maxRange) {
         numberArray[composite] = 0;
-
         composite += number;
       }
     }
 
-    if (number <= Math.sqrt(maxRange)) {
-      sieveOfEratosthenes(number + 1);
-    }
+    if (number <= Math.sqrt(maxRange)) sieveOfEratosthenes(number + 1);
   }
 
   function main() {
-    numberArray[maxRange] = 1;
+    numberArray[maxRange] = 1; // creates an empty array of nth order
     numberArray.fill(1, 0, maxRange);
 
     dbFile.primes.forEach((prime) => sieveOfEratosthenes(prime));
 
-    for (let i = minRange; i < maxRange; i++) {
-      if (numberArray[i] == 1 && !dbFile.primes.includes(i)) {
-        primes.push(i);
+    for (let number = minRange; number < maxRange; number++) {
+      if (numberArray[number] == 1 && !dbFile.primes.includes(number)) {
+        calculatedPrimes.push(number);
       }
     }
 
-    if (lastPrimeInDb < primes[primes.length - 1]) {
+    if (lastPrimeInDb < calculatedPrimes[calculatedPrimes.length - 1]) {
       writeJsonFile("./data/primes.json", {
-        primes: [...dbFile.primes, ...primes],
+        primes: [...dbFile.primes, ...calculatedPrimes],
       });
     }
-    primes = dbFile.primes.filter((prime) => prime < maxRange);
+    return dbFile.primes.filter((prime) => prime < maxRange);
   }
-  main();
+  const primes = main();
 
   return {
     props: { maxRange, primes, dbFile },
