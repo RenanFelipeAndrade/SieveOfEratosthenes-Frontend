@@ -14,7 +14,9 @@ function Home({ maxRange, primes, dbFile }: HomeProps) {
   console.log(dbFile);
   return (
     <div>
-      <h1>Números primos entre 0 e {maxRange}</h1>
+      <header>
+        <h1>Números primos entre 0 e {maxRange}</h1>
+      </header>
       <ul className="numbers">
         {primes.map((primeNumber) => (
           <li key={primeNumber}>{primeNumber};</li>
@@ -29,56 +31,61 @@ export function getServerSideProps() {
   const dbInstance = () => {
     const hasDbFile = existsSync(dbPath);
     if (hasDbFile) return JSON.parse(readFileSync(dbPath).toString());
-    writeJsonFile(dbPath, { primes: [] });
+    writeJsonFile(dbPath, { primes: [2] });
     return JSON.parse(readFileSync(dbPath).toString());
   };
 
-  const lastPrimeInDb = () => {
+  const dbFile: DbFile = dbInstance();
+  const getLastPrimeInDb = () => {
     const hasPrimes = Object.keys(dbFile).some(
       (key) => key.toString() === "primes"
     );
-    if (hasPrimes) return dbFile.primes[0];
-    writeJsonFile(dbPath, { primes: [] });
-    return 0;
+
+    if (hasPrimes && dbFile.primes.length > 0)
+      return dbFile.primes[dbFile.primes.length - 1];
+
+    writeJsonFile(dbPath, { primes: [2] });
+    return 2;
   };
 
-  const dbFile: DbFile = dbInstance();
-  const maxRange = 100;
-  const minRange = lastPrimeInDb();
+  const lastPrimeInDb = getLastPrimeInDb();
+  const maxRange = 1000;
+  const minRange = lastPrimeInDb;
   const numberArray: number[] = [];
-  const primes: number[] = [];
+  let primes: number[] = [];
 
-  function sieveOfEratosthenes(position: number) {
-    let composite: number = position * 2;
+  function sieveOfEratosthenes(number: number) {
+    let composite: number = number * 2;
 
-    if (position <= 1) {
-      numberArray[position] = 0;
-    } else if (numberArray[position] == 1) {
+    if (number <= 1) {
+      numberArray[number] = 0;
+    } else if (numberArray[number] === 1) {
       while (composite < maxRange) {
         numberArray[composite] = 0;
 
-        composite += position;
+        composite += number;
       }
     }
 
-    if (position <= Math.sqrt(maxRange)) {
-      sieveOfEratosthenes(position + 1);
+    if (number <= Math.sqrt(maxRange)) {
+      sieveOfEratosthenes(number + 1);
     }
   }
 
   function main() {
-    for (let i = 0; i < maxRange; i++) {
-      numberArray[i] = 1;
-    }
+    numberArray[maxRange] = 1;
+    numberArray.fill(1, 0, maxRange);
 
-    sieveOfEratosthenes(0);
+    dbFile.primes.forEach((prime) => sieveOfEratosthenes(prime));
 
-    for (let i = 0; i < maxRange; i++) {
+    for (let i = minRange; i < maxRange; i++) {
       if (numberArray[i] == 1) {
         primes.push(i);
       }
-      if (dbFile.primes[-1] < primes[-1])
-        writeJsonFile("./data/primes.json", { primes: primes });
+    }
+
+    if (lastPrimeInDb < primes[0]) {
+      writeJsonFile("./data/primes.json", { primes: primes });
     }
   }
   main();
