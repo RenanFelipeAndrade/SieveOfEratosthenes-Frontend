@@ -1,17 +1,17 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { writeJsonFile } from "write-json-file";
 
 interface HomeProps {
   maxRange: number;
   primes: number[];
-  primesInDb: PrimesInDb;
+  dbFile: DbFile;
 }
-interface PrimesInDb {
+interface DbFile {
   primes: number[];
 }
 
-function Home({ maxRange, primes, primesInDb }: HomeProps) {
-  console.log(primesInDb.primes);
+function Home({ maxRange, primes, dbFile }: HomeProps) {
+  console.log(dbFile);
   return (
     <div>
       <h1>Números primos entre 0 e {maxRange}</h1>
@@ -25,12 +25,28 @@ function Home({ maxRange, primes, primesInDb }: HomeProps) {
 }
 
 export function getServerSideProps() {
-  let maxRange = 200;
-  let numberArray: number[] = [];
-  let primes: number[] = [];
-  let primesInDb: PrimesInDb = JSON.parse(
-    readFileSync("../data/primes.json").toString()
-  );
+  const dbPath = "./data/primes.json";
+  const dbInstance = () => {
+    const hasDbFile = existsSync(dbPath);
+    if (hasDbFile) return JSON.parse(readFileSync(dbPath).toString());
+    writeJsonFile(dbPath, { primes: [] });
+    return JSON.parse(readFileSync(dbPath).toString());
+  };
+
+  const lastPrimeInDb = () => {
+    const hasPrimes = Object.keys(dbFile).some(
+      (key) => key.toString() === "primes"
+    );
+    if (hasPrimes) return dbFile.primes[0];
+    writeJsonFile(dbPath, { primes: [] });
+    return 0;
+  };
+
+  const dbFile: DbFile = dbInstance();
+  const maxRange = 100;
+  const minRange = lastPrimeInDb();
+  const numberArray: number[] = [];
+  const primes: number[] = [];
 
   function sieveOfEratosthenes(position: number) {
     let composite: number = position * 2;
@@ -61,14 +77,14 @@ export function getServerSideProps() {
       if (numberArray[i] == 1) {
         primes.push(i);
       }
-      if (primesInDb.primes.length < primes.length)
-        writeJsonFile("../data/primes.json", { primes: primes });
+      if (dbFile.primes[-1] < primes[-1])
+        writeJsonFile("./data/primes.json", { primes: primes });
     }
   }
   main();
 
   return {
-    props: { maxRange, primes, primesInDb },
+    props: { maxRange, primes, dbFile },
   };
 }
 export default Home;
