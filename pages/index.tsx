@@ -2,6 +2,7 @@ import { writeJsonFile } from "write-json-file";
 import { DbFile } from "../types/DbFile";
 import { getDb } from "../utils/getDb";
 import { getLastPrimeInDb } from "../utils/getLastPrimeInDb";
+import { PrimesList } from "../components/PrimesList";
 
 interface HomeProps {
   maxRange: number;
@@ -14,11 +15,7 @@ function Home({ maxRange, primes }: HomeProps) {
       <header>
         <h1>The prime numbers between 0 and {maxRange}</h1>
       </header>
-      <ul className="numbers">
-        {primes.map((primeNumber) => (
-          <li key={primeNumber}>{primeNumber};</li>
-        ))}
-      </ul>
+      <PrimesList primes={primes} />
     </div>
   );
 }
