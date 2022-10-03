@@ -79,14 +79,17 @@ export function getServerSideProps() {
     dbFile.primes.forEach((prime) => sieveOfEratosthenes(prime));
 
     for (let i = minRange; i < maxRange; i++) {
-      if (numberArray[i] == 1) {
+      if (numberArray[i] == 1 && !dbFile.primes.includes(i)) {
         primes.push(i);
       }
     }
 
-    if (lastPrimeInDb < primes[0]) {
-      writeJsonFile("./data/primes.json", { primes: primes });
+    if (lastPrimeInDb < primes[primes.length - 1]) {
+      writeJsonFile("./data/primes.json", {
+        primes: [...dbFile.primes, ...primes],
+      });
     }
+    primes = dbFile.primes.filter((prime) => prime < maxRange);
   }
   main();
 
