@@ -26,7 +26,7 @@ function Home({ maxRange, primes }: HomeProps) {
 export function getServerSideProps() {
   const dbFile: DbFile = getDb();
   const lastPrimeInDb = getLastPrimeInDb();
-  const maxRange = 1000;
+  const maxRange = 150;
   const minRange = lastPrimeInDb;
   const numberArray: number[] = [];
   const calculatedPrimes: number[] = [];
@@ -38,15 +38,16 @@ export function getServerSideProps() {
      * From that prime number, run through all its multiples up to N and mark them as composites
      * Repeat from step 2.
      */
-    let composite = number * 2;
 
     if (number <= 1) {
       numberArray[number] = 0;
     } else if (numberArray[number] === 1) {
-      while (composite < maxRange) {
+      for (
+        let composite = number * 2;
+        composite < maxRange;
+        composite += number
+      )
         numberArray[composite] = 0;
-        composite += number;
-      }
     }
 
     if (number <= Math.sqrt(maxRange)) sieveOfEratosthenes(number + 1);
@@ -74,7 +75,7 @@ export function getServerSideProps() {
   const primes = main();
 
   return {
-    props: { maxRange, primes, dbFile },
+    props: { maxRange, primes },
   };
 }
 export default Home;
