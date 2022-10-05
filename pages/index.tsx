@@ -7,14 +7,16 @@ import { PrimesList } from "../components/PrimesList";
 interface HomeProps {
   maxRange: number;
   primes: number[];
+  timeSpent: number;
 }
 
-function Home({ maxRange, primes }: HomeProps) {
+function Home({ maxRange, primes, timeSpent }: HomeProps) {
   return (
     <div>
       <header>
         <h1>The prime numbers between 0 and {maxRange}</h1>
         <p>The amount of primes is {primes.length}</p>
+        <p>Time spent to calculate: {timeSpent} ms</p>
       </header>
       <PrimesList primes={primes} />
     </div>
@@ -70,10 +72,14 @@ export function getServerSideProps() {
     }
     return dbFile.primes.filter((prime) => prime < maxRange);
   }
+  const initialTime = Date.now();
   const primes = main();
+  const endTime = Date.now();
+
+  const timeSpent = endTime - initialTime;
 
   return {
-    props: { maxRange, primes },
+    props: { maxRange, primes, timeSpent },
   };
 }
 export default Home;
