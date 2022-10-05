@@ -14,6 +14,7 @@ function Home({ maxRange, primes }: HomeProps) {
     <div>
       <header>
         <h1>The prime numbers between 0 and {maxRange}</h1>
+        <p>The amount of primes is {primes.length}</p>
       </header>
       <PrimesList primes={primes} />
     </div>
