@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
-import { writeJsonFile } from "write-json-file";
+import { writeJsonFileSync } from "write-json-file";
 
 export function createDb(path: string) {
-  if (path.includes("primes")) writeJsonFile(path, { primes: [2] });
-  else writeJsonFile(path, {});
+  if (path.includes("primes")) writeJsonFileSync(path, { primes: [2] });
+  else writeJsonFileSync(path, {});
   return JSON.parse(readFileSync(path).toString());
 }
