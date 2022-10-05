@@ -1,18 +1,14 @@
-import { writeJsonFile } from "write-json-file";
-import { DbFile } from "../types/DbFile";
+import { writeJsonFileSync } from "write-json-file";
 import { getDb } from "./getDb";
 
 export function getLastPrimeInDb() {
   const dbName = "primes";
-  const dbFile: DbFile = getDb(dbName);
+  const { db } = getDb(dbName);
 
-  const hasPrimes = Object.keys(dbFile).some(
-    (key) => key.toString() === "primes"
-  );
+  const hasPrimes = Object.keys(db).some((key) => key.toString() === "primes");
 
-  if (hasPrimes && dbFile.primes.length > 0)
-    return dbFile.primes[dbFile.primes.length - 1];
+  if (hasPrimes && db.primes.length > 0) return db.primes[db.primes.length - 1];
 
-  writeJsonFile(dbName, { primes: [2] });
+  writeJsonFileSync(dbName, { primes: [2] });
   return 2;
 }

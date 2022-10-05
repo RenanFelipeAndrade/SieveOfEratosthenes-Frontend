@@ -1,8 +1,9 @@
-import { writeJsonFile } from "write-json-file";
-import { DbFile } from "../types/DbFile";
+import { writeJsonFileSync } from "write-json-file";
 import { getDb } from "../utils/getDb";
 import { getLastPrimeInDb } from "../utils/getLastPrimeInDb";
 import { PrimesList } from "../components/PrimesList";
+import { writeArrayInDb } from "../utils/writeArrayInDb";
+import { DbPrimes } from "../types/DbPrimes";
 
 interface HomeProps {
   maxRange: number;
@@ -24,7 +25,7 @@ function Home({ maxRange, primes, timeSpent }: HomeProps) {
 }
 
 export function getServerSideProps() {
-  const dbFile: DbFile = getDb("primes");
+  const { db: dbFile }: DbPrimes = getDb("primes");
   const lastPrimeInDb = getLastPrimeInDb();
   const maxRange = 150;
   const minRange = lastPrimeInDb;
@@ -66,17 +67,18 @@ export function getServerSideProps() {
     }
 
     if (lastPrimeInDb < calculatedPrimes[calculatedPrimes.length - 1]) {
-      writeJsonFile("./data/primes.json", {
+      writeJsonFileSync("./data/primes.json", {
         primes: [...dbFile.primes, ...calculatedPrimes],
       });
     }
     return dbFile.primes.filter((prime) => prime < maxRange);
   }
-  const initialTime = Date.now();
+  const initialTime = performance.now();
   const primes = main();
-  const endTime = Date.now();
+  const endTime = performance.now();
 
   const timeSpent = endTime - initialTime;
+  writeArrayInDb("times", [{ [maxRange]: timeSpent }]);
 
   return {
     props: { maxRange, primes, timeSpent },
