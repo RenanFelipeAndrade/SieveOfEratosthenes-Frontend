@@ -1,4 +1,3 @@
-import { writeJsonFileSync } from "write-json-file";
 import { getDb } from "../utils/getDb";
 import { getLastPrimeInDb } from "../utils/getLastPrimeInDb";
 import { PrimesList } from "../components/PrimesList";
@@ -67,9 +66,8 @@ export function getServerSideProps() {
     }
 
     if (lastPrimeInDb < calculatedPrimes[calculatedPrimes.length - 1]) {
-      writeJsonFileSync("./data/primes.json", {
-        primes: [...dbFile.primes, ...calculatedPrimes],
-      });
+      writeArrayInDb("primes", calculatedPrimes);
+      return [2, ...calculatedPrimes];
     }
     return dbFile.primes.filter((prime) => prime < maxRange);
   }
