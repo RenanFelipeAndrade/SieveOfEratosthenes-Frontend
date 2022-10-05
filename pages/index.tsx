@@ -24,7 +24,7 @@ function Home({ maxRange, primes, timeSpent }: HomeProps) {
 }
 
 export function getServerSideProps() {
-  const dbFile: DbFile = getDb();
+  const dbFile: DbFile = getDb("primes");
   const lastPrimeInDb = getLastPrimeInDb();
   const maxRange = 150;
   const minRange = lastPrimeInDb;
