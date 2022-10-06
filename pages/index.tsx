@@ -7,16 +7,14 @@ import { DbPrimes } from "../types/DbPrimes";
 interface HomeProps {
   maxRange: number;
   primes: number[];
-  timeSpent: number;
 }
 
-function Home({ maxRange, primes, timeSpent }: HomeProps) {
+function Home({ maxRange, primes }: HomeProps) {
   return (
     <div>
       <header>
         <h1>The prime numbers between 0 and {maxRange}</h1>
         <p>The amount of primes is {primes.length}</p>
-        <p>Time spent to calculate: {timeSpent} ms</p>
       </header>
       <PrimesList primes={primes} />
     </div>
@@ -26,8 +24,7 @@ function Home({ maxRange, primes, timeSpent }: HomeProps) {
 export function getServerSideProps() {
   const { db: dbFile }: DbPrimes = getDb("primes");
   const lastPrimeInDb = getLastPrimeInDb();
-  const maxRange = 150;
-  const minRange = lastPrimeInDb;
+  const maxRange = 900000;
   const numberArray: number[] = [];
   const calculatedPrimes: number[] = [];
 
@@ -38,7 +35,6 @@ export function getServerSideProps() {
      * From that prime number, run through all its multiples up to N and mark them as composites
      * Repeat from step 2.
      */
-
     if (number <= 1) {
       numberArray[number] = 0;
     } else if (numberArray[number] === 1) {
@@ -51,35 +47,27 @@ export function getServerSideProps() {
     }
 
     if (number <= Math.sqrt(maxRange)) sieveOfEratosthenes(number + 1);
+    // if (number <= Math.sqrt(maxRange)) return;
   }
 
   function main() {
-    numberArray[maxRange] = 1; // creates an empty array of nth order
-    numberArray.fill(1, 0, maxRange);
+    if (lastPrimeInDb > maxRange - 10)
+      return dbFile.primes.filter((prime) => prime < maxRange);
+    for (let number = 0; number < maxRange; number++) numberArray[number] = 1;
 
-    dbFile.primes.forEach((prime) => sieveOfEratosthenes(prime));
-
-    for (let number = minRange; number < maxRange; number++) {
-      if (numberArray[number] == 1 && !dbFile.primes.includes(number)) {
+    sieveOfEratosthenes(0);
+    for (let number = 0; number < maxRange; number++) {
+      if (numberArray[number] == 1) {
         calculatedPrimes.push(number);
       }
     }
-
-    if (lastPrimeInDb < calculatedPrimes[calculatedPrimes.length - 1]) {
-      writeArrayInDb("primes", calculatedPrimes);
-      return [2, ...calculatedPrimes];
-    }
-    return dbFile.primes.filter((prime) => prime < maxRange);
+    writeArrayInDb("primes", calculatedPrimes);
+    return calculatedPrimes;
   }
-  const initialTime = performance.now();
   const primes = main();
-  const endTime = performance.now();
-
-  const timeSpent = endTime - initialTime;
-  writeArrayInDb("times", [{ [maxRange]: timeSpent }]);
 
   return {
-    props: { maxRange, primes, timeSpent },
+    props: { maxRange, primes },
   };
 }
 export default Home;
