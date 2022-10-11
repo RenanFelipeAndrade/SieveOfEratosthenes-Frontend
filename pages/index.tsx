@@ -1,73 +1,46 @@
-import { getDb } from "../utils/getDb";
-import { getLastPrimeInDb } from "../utils/getLastPrimeInDb";
 import { PrimesList } from "../components/PrimesList";
-import { writeArrayInDb } from "../utils/writeArrayInDb";
-import { DbPrimes } from "../types/DbPrimes";
+import axios from "axios";
 
 interface HomeProps {
-  maxRange: number;
   primes: number[];
+  maxRange: number;
+  timeToCalc: number;
 }
 
-function Home({ maxRange, primes }: HomeProps) {
+function Home({ maxRange, primes, timeToCalc }: HomeProps) {
   return (
-    <div>
+    <div className="sm:px-10 px-4">
       <header>
+        <h1 className="my-4 sm:text-3xl text-2xl font-semibold text-center sm:text-left">
+          Sieve Of Eratosthenes
+        </h1>
+        {/* <div>
+          <input type="text" name="primeInput" ref={primeRef} id="primeInput" />
+        </div> */}
+      </header>
+      <main>
         <h1>The prime numbers between 0 and {maxRange}</h1>
         <p>The amount of primes is {primes.length}</p>
-      </header>
+        <p>The time to calculate was {timeToCalc} ms</p>
+      </main>
       <PrimesList primes={primes} />
     </div>
   );
 }
 
-export function getServerSideProps() {
-  const { db: dbFile }: DbPrimes = getDb("primes");
-  const lastPrimeInDb = getLastPrimeInDb();
-  const maxRange = 900000;
-  const numberArray: number[] = [];
-  const calculatedPrimes: number[] = [];
-
-  function sieveOfEratosthenes(number: number) {
-    /**
-     * Write all numbers from 2 to N. Do not consider them prime or composite (2 or more distinct divisors).
-     * Takes the first number that hasn't been marked as composite, consider it's prime.
-     * From that prime number, run through all its multiples up to N and mark them as composites
-     * Repeat from step 2.
-     */
-    if (number <= 1) {
-      numberArray[number] = 0;
-    } else if (numberArray[number] === 1) {
-      for (
-        let composite = number * 2;
-        composite < maxRange;
-        composite += number
-      )
-        numberArray[composite] = 0;
-    }
-
-    if (number <= Math.sqrt(maxRange)) sieveOfEratosthenes(number + 1);
-    // if (number <= Math.sqrt(maxRange)) return;
-  }
-
-  function main() {
-    if (lastPrimeInDb > maxRange - 10)
-      return dbFile.primes.filter((prime) => prime < maxRange);
-    for (let number = 0; number < maxRange; number++) numberArray[number] = 1;
-
-    sieveOfEratosthenes(0);
-    for (let number = 0; number < maxRange; number++) {
-      if (numberArray[number] == 1) {
-        calculatedPrimes.push(number);
-      }
-    }
-    writeArrayInDb("primes", calculatedPrimes);
-    return calculatedPrimes;
-  }
-  const primes = main();
-
+export async function getServerSideProps() {
+  const maxRange = 100;
+  const fetchPrimes = async () =>
+    await axios
+      .get(`http://localhost:8000/number/${maxRange}`)
+      .then((response) => response.data)
+      .catch((error) => console.log(error));
+  const initTime = performance.now();
+  const primes = await fetchPrimes();
+  const endTime = performance.now();
+  const timeToCalc = endTime - initTime;
   return {
-    props: { maxRange, primes },
+    props: { maxRange, primes, timeToCalc },
   };
 }
 export default Home;
