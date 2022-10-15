@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "./Button";
 import { PerPageSelector } from "./PerPageSelector";
 
 export interface PaginationProps {
@@ -32,7 +33,7 @@ export function Pagination({
   }
 
   return (
-    <section className="mt-2">
+    <section className="border-t-2 border-t-primary py-2">
       <div className="flex justify-between">
         <div>
           <span>
@@ -47,8 +48,8 @@ export function Pagination({
         <span>Page: {pagination.page + 1}</span>
       </div>
       <div className="mt-2 flex justify-between">
-        <button onClick={nextPage}>Back</button>
-        <button onClick={previousPage}>Next</button>
+        <Button onClick={nextPage}>Back</Button>
+        <Button onClick={previousPage}>Next</Button>
       </div>
     </section>
   );
