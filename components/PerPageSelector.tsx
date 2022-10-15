@@ -5,9 +5,33 @@ export function PerPageSelector({
   setPagination,
   primes,
 }: PaginationProps) {
+  const perPageOptions: JSX.Element[] = [];
+  let previousFiboValue = 0;
+  const numberOfOptions = 11;
+  // generate all option tags
+  for (let i = 0; i < numberOfOptions; i++) {
+    const fiboValue = fibonacci(i);
+    if (fiboValue !== previousFiboValue) {
+      previousFiboValue = fiboValue;
+      const number = Number(fiboValue.toString() + "0");
+      const element = (
+        <option key={number} value={number}>
+          {number}
+        </option>
+      );
+      perPageOptions.push(element);
+    }
+  }
+
+  function fibonacci(n: number): number {
+    if (n <= 1) return 1;
+    return fibonacci(n - 2) + fibonacci(n - 1);
+  }
+
   return (
     <select
       value={pagination.perPage}
+      className="rounded"
       onChange={(e) => {
         setPagination((previousState) => {
           return {
@@ -17,13 +41,7 @@ export function PerPageSelector({
         });
       }}
     >
-      <option value={10}>10</option>
-      <option value={20}>20</option>
-      <option value={30}>30</option>
-      <option value={50}>50</option>
-      <option value={80}>80</option>
-      <option value={130}>130</option>
-      <option value={210}>210</option>
+      {perPageOptions}
       <option value={primes.length}>all</option>
     </select>
   );
