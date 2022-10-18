@@ -1,26 +1,18 @@
-# Sieve of Eratosthenes
+# Sieve Of Eratosthenes - Web
 
 ## Requirements
 
-- Nodejs 16 or higher
-- NPM 8 or higher
+- Docker-compose v2.1
+- Docker v20
+- [The server](https://github.com/RenanFelipeAndrade/sieve-of-eratosthenes-server.git)
 
-## Get started
+## Instalation
 
-Clone the repository
-
-```bash
-git clone https://github.com/RenanFelipeAndrade/sieve-of-eratosthenes.git
-```
-
-Inside the directory, install all dependencies
+Inside the directory of the project, run
 
 ```bash
-npm install
+docker-compose up
 ```
 
-Now, run the project
+And that is it! The web client will be running at [localhost:3000](http://localhost:3000)
 
-```bash
-npm run dev
-```
