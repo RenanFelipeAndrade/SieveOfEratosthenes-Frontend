@@ -51,10 +51,11 @@ function Home({ maxRange, primes, timeToCalc }: HomeProps) {
 }
 
 export async function getServerSideProps({ query }: GetServerSidePropsContext) {
+  const url = process.env.API_URL;
   const maxRange = Number(query.range) > 2 ? query.range : 3;
   const fetchPrimes = async () =>
     await axios
-      .get(`http://localhost:8000/number/${maxRange}`)
+      .get(`${url}/number/${maxRange}`)
       .then((response) => response.data)
       // TODO: treat exceptions
       .catch((error) => console.log(error));
