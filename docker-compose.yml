@@ -5,7 +5,7 @@ services:
     working_dir: /sieve_web
     volumes:
       - .:/sieve_web
-      - /sieve_web/node_modules
+      - ./node_modules:/sieve_web/node_modules
     ports:
       - "3000:3000"
     command: bash -c "npm i && npm run dev"
@@ -15,11 +15,9 @@ services:
   sieve_server:
     container_name: sieve_server
     image: julia
+    working_dir: /sieve_server
     volumes:
       - ../sieve-of-eratosthenes-server:/sieve_server
-    working_dir: /sieve_server
     ports:
       - "8000:8080"
-    expose:
-      - "8080"
     command: bash -c "julia -e 'using Pkg; Pkg.activate(@__DIR__); Pkg.instantiate()' && julia --project=. ./server.jl"
