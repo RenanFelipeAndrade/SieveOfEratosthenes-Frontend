@@ -19,6 +19,25 @@ root_dir
 ----sieve-of-eratosthenes-web
 ```
 
+On the **server** directory, uncomment the lines on
+docker-compose file (just remove all "#"). The section
+have to look like this
+
+```yml
+sieve_web:
+  container_name: sieve_web
+  image: "node:16"
+  working_dir: /sieve_web
+  volumes:
+    - ../sieve-of-eratosthenes-web:/sieve_web
+    - ../sieve-of-eratosthenes-web/node_modules:/sieve_web/node_modules
+  ports:
+    - "3000:3000"
+  command: bash -c "npm i && npm run dev"
+  depends_on:
+    - sieve_server
+```
+
 Inside the **server** directory, run
 
 ```
