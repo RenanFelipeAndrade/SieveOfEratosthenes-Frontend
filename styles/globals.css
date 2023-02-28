@@ -2,6 +2,12 @@
 @tailwind utilities;
 @tailwind variants;
 
-body{
-  @apply bg-primary-light 
+html,
+body,
+#__next {
+  @apply h-full;
+}
+body {
+  @apply bg-primary-light;
+  font-family: American Typewriter, Times New Roman, Roboto;
 }
