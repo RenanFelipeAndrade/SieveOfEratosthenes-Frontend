@@ -15,7 +15,7 @@ interface HomeProps {
 
 function Home({ maxRange, primes, timeToCalc, axiosError }: HomeProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  if (axiosError) {
+  if (axiosError?.name && axiosError.message) {
     return (
       <div className="h-full flex justify-center items-center">
         <div className="text-center">
